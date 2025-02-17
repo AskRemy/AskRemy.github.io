@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ask Remy</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            margin: 0;
+        }
+        img {
+            width: 500px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 80%;
+            max-width: 600px;
+            height: 200px;
+            resize: none;
+            margin-bottom: 20px;
+            font-size: 16px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 16px;
+            width: 80%;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <img src="./media/rat.png" alt="Rat">
+    <h2>Oh rats! Looks like this website is under construction!</h2>
+    
+    <h1>Speech Recognition Example</h1>
+    <textarea id="textbox" readonly></textarea>
+    
+    <script>
+        // Check if the browser supports the Speech Recognition API
+        if (!('webkitSpeechRecognition' in window)) {
+            alert("Your browser does not support speech recognition.");
+        } else {
+            const recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;  // Keep listening
+            recognition.interimResults = true;  // Display results while the user is speaking
+            recognition.lang = 'en-US';  // Set language
+            recognition.maxAlternatives = 1;  // Only consider the top recognition result
+
+            recognition.onresult = function(event) {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                
+                // Update the textbox with the recognized speech
+                document.getElementById('textbox').value = transcript;
+            };
+
+            recognition.onend = function() {
+                console.log('Recognition ended. Restarting...');
+                recognition.start();  // Restart recognition after it ends
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Error occurred in speech recognition:', event.error);
+            };
+
+            recognition.start();  // Start listening
+        }
+    </script>
+
+    <button onclick="scrape()">Scrape</button>
+    <pre id="output"></pre>
+
+    <script>
+        async function scrape() {
+
+            let pyodide = await loadPyodide();
+
+            let result = await pyodide.runPython(`
+                print("hello world")
+                x = "hello there"
+                x
+            `);
+            document.getElementById('output').innerText = result;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go to URL</title>
+</head>
+<body>
+    <h2>Go to a Specific Part of a Website</h2>
+    <label for="url">Enter URL:</label>
+    <input type="text" id="url" placeholder="https://example.com">
+    
+    <label for="fragment">Enter ID/Hash (optional):</label>
+    <input type="text" id="fragment" placeholder="section-id">
+
+    <button onclick="goToURL()">Go</button>
+
+    <script>
+        function goToURL() {
+            let url = document.getElementById("url").value;
+            let fragment = document.getElementById("fragment").value;
+            
+            if (!url.startsWith("http")) {
+                alert("Please enter a valid URL starting with http or https.");
+                return;
+            }
+
+            if (fragment) {
+                window.location.href = url + "#" + fragment; // Appends the fragment to scroll to that section
+            } else {
+                window.location.href = url; // Just goes to the URL
+            }
+        }
+    </script>
+</body>
+</html>
