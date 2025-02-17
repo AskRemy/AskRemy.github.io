@@ -3,31 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ask Remy</title>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-            font-family: Arial, sans-serif;
-            background-color: #f8f8f8;
-        }
-        img {
-            width: 500px;
-            height: auto;
-            margin-bottom: 20px;
-        }
-    </style>
+    <title>Speech Recognition</title>
 </head>
 <body>
-    <img src="./media/rat.png" alt="Rat">
-    <h2>Oh rats! Looks like this website is under construction!</h2>
-
-
     <h1>Speech Recognition Example</h1>
     <textarea id="textbox" rows="10" cols="50" readonly></textarea>
     
@@ -62,23 +40,6 @@
             };
 
             recognition.start();  // Start listening
-        }
-    </script>
-
-    <button onclick="scrape()">Scrape</button>
-    <pre id="output"></pre>
-
-    <script>
-        async function scrape() {
-
-            let pyodide = await loadPyodide();
-
-            let result = await pyodide.runPython(`
-                print("hello world")
-                x = "hello there"
-                x
-            `);
-            document.getElementById('output').innerText = result;
         }
     </script>
 </body>
