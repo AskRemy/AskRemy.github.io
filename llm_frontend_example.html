@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ask Remy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background: linear-gradient(to right, #141e30, #243b55);
+        color: white;
+      }
+      .container {
+        width: 90%;
+        max-width: 600px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      }
+      .header {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+      .image-container img {
+        width: 100px;
+        height: auto;
+        margin-bottom: 10px;
+      }
+      textarea {
+        width: 100%;
+        height: 100px;
+        padding: 10px;
+        border-radius: 5px;
+        border: none;
+        resize: none;
+        font-size: 16px;
+      }
+      button {
+        margin-top: 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        background: #4caf50;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      button:hover {
+        background: #45a049;
+      }
+      .response-box {
+        margin-top: 20px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 5px;
+        text-align: left;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      .loading {
+        display: none;
+        margin-top: 10px;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">Ask Remy</div>
+      <div class="image-container">
+        <img src="./media/rat.png" alt="Remy the Rat">
+      </div>
+      <textarea id="userInput" placeholder="Type your message..."></textarea>
+      <button id="sendButton">Send</button>
+      <div class="loading" id="loading">Generating response...</div>
+      <div class="response-box" id="response"></div>
+    </div>
+    <script>
+      document.getElementById("sendButton").addEventListener("click", () => {
+        const userInput = document.getElementById("userInput").value.trim();
+        const responseElement = document.getElementById("response");
+        const loadingElement = document.getElementById("loading");
+        if (!userInput) return;
+
+        const apiKey = localStorage.getItem("GEMINI_API_KEY") || prompt("Enter your Gemini API key:");
+        if (!apiKey) return;
+        localStorage.setItem("GEMINI_API_KEY", apiKey);
+
+        loadingElement.style.display = "block";
+        responseElement.innerHTML = "";
+
+        fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: userInput }] }]
+          })
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
+            responseElement.innerText = responseText;
+          })
+          .catch((error) => {
+            responseElement.innerText = "Error: " + error.message;
+          })
+          .finally(() => {
+            loadingElement.style.display = "none";
+          });
+      });
+    </script>
+  </body>
+</html>

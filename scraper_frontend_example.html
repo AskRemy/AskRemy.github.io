@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AskRemy Recipe Scraper</title>
+    <!-- Bootstrap CSS for quick styling -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styling -->
+    <style>
+        body {
+            background-color: #f0f8ff;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .header {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .output {
+            margin-top: 20px;
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>AskRemy Recipe Scrape</h1>
+            <p>Enter a URL to scrape and get the page title!</p>
+        </div>
+
+        <!-- Form to enter URL -->
+        <form id="scrapeForm">
+            <div class="form-group">
+                <label for="urlInput">Website URL</label>
+                <input type="url" class="form-control" id="urlInput" placeholder="Enter URL" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Scrape Website</button>
+        </form>
+
+        <!-- Output area -->
+        <div id="output" class="output" style="display:none;">
+            <h4>Page Title:</h4>
+            <p id="title"></p>
+        </div>
+
+        <!-- Error message area -->
+        <div id="error" class="alert alert-danger" role="alert" style="display:none;">
+            <strong>Error!</strong> Unable to scrape the website. Please try again later.
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Handle the form submission
+        $('#scrapeForm').on('submit', function (event) {
+            event.preventDefault();
+
+            // Get the URL from the input
+            const url = $('#urlInput').val();
+            const apiUrl = `https://scraper-3kvv.onrender.com/scrape?url=${encodeURIComponent(url)}`;
+
+            // Reset UI before making the request
+            $('#output').hide();
+            $('#error').hide();
+
+            // Fetch the title from the API
+            $.get(apiUrl, function (data) {
+                // If the response has a title, show it
+                if (data.title) {
+                    $('#title').text(data.title);
+                    $('#output').show();
+                } else {
+                    showError();
+                }
+            }).fail(function () {
+                // If the request fails, show an error message
+                showError();
+            });
+        });
+
+        // Show error message
+        function showError() {
+            $('#error').show();
+        }
+    </script>
+
+</body>
+
+</html>
+
