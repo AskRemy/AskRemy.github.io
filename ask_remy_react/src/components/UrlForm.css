@@ -1,0 +1,55 @@
+form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%; /* Ensure it stretches fully */
+    max-width: 600px; /* Adjust width as needed */
+  }
+  
+  input {
+    flex: 1;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+  } */
+  
+  input:focus {
+    border-color: #e87b71;
+  }
+  
+  button {
+    padding: 8px 12px;
+    font-size: 16px;
+    color: white;
+    background-color: #E74C3D;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  button:hover:not(:disabled) {
+    background-color: #e87b71;
+  }
+
+  
+  /*input {
+    flex-grow: 1;
+    padding: 12px;
+    font-size: 18px;
+    width: 100%;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+  } */
+  
+  
+
+  

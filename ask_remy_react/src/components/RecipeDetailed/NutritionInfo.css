@@ -1,0 +1,42 @@
+/* NutritionInfo.css */
+.nutrition-info {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .nutrition-info h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    color: #333;
+  }
+  
+  .nutrition-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .nutrition-item {
+    text-align: center;
+    background-color: white;
+    border-radius: 6px;
+    padding: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .nutrition-value {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #e74c3c;
+  }
+  
+  .nutrition-label {
+    display: block;
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 4px;
+  }

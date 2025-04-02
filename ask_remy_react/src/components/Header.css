@@ -1,0 +1,82 @@
+/* Header.css */
+.app-header {
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 0.75rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  
+  .header-container {
+    max-width: 1200px;
+    margin: 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+  }
+  
+  .logo-container {
+    display: flex;
+    align-items: left;
+  }
+  
+  .logo-link {
+    text-decoration: none;
+    color: #e74c3c;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo-image {
+    width: 60px; /* Adjust size of the image */
+    height: 60px;
+    border-radius: 10%; /* Makes the image round */
+    margin-right: 10px; /* Adds space between the image and title */
+  }
+  
+  .logo-link h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+  
+  .tagline {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #555;
+  }
+  
+  .main-nav {
+    flex-grow: 1;
+    margin: 0 2rem;
+  }
+
+  
+  .icon {
+    font-size: 1.2rem;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .header-container {
+      flex-wrap: wrap;
+    }
+    
+    .logo-container {
+      flex-basis: 100%;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .main-nav {
+      margin: 0.5rem 0;
+      order: 3;
+      flex-basis: 100%;
+    }
+    
+    .user-actions {
+      order: 2;
+    }
+  }

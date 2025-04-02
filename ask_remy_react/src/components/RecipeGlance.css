@@ -1,0 +1,186 @@
+/* RecipeGlance.css */
+.recipe-glance-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .recipe-glance-modal {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: relative;
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #555;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+  }
+  
+  .close-button:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .recipe-glance-header {
+    padding: 20px 20px 10px;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .recipe-glance-header h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #333;
+  }
+  
+  .recipe-subtitle {
+    color: #666;
+    margin: 5px 0 0;
+    font-size: 0.95rem;
+  }
+  
+  .recipe-glance-content {
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .recipe-glance-image {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .recipe-glance-image img {
+    width: 100%;
+    border-radius: 6px;
+    object-fit: cover;
+    max-height: 300px;
+  }
+  
+  .recipe-glance-details {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .recipe-meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .meta-item {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 6px;
+  }
+  
+  .meta-label {
+    display: block;
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 2px;
+  }
+  
+  .meta-value {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #333;
+  }
+  
+  .recipe-glance-ingredients h3,
+  .recipe-glance-equipment h3 {
+    font-size: 1.1rem;
+    margin: 0 0 10px;
+    color: #333;
+  }
+  
+  .recipe-glance-ingredients ul,
+  .recipe-glance-equipment ul {
+    margin: 0;
+    padding: 0 0 0 18px;
+  }
+  
+  .recipe-glance-ingredients li,
+  .recipe-glance-equipment li {
+    margin-bottom: 5px;
+  }
+  
+  .more-info {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 5px;
+    font-style: italic;
+  }
+  
+  .recipe-glance-actions {
+    padding: 15px 20px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  .primary-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .primary-button:hover {
+    background-color: #c0392b;
+  }
+  
+  .secondary-button {
+    background-color: #f8f9fa;
+    color: #333;
+    border: 1px solid #dee2e6;
+    padding: 10px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .secondary-button:hover {
+    background-color: #e9ecef;
+  }
+  
+  @media (max-width: 768px) {
+    .recipe-meta {
+      grid-template-columns: 1fr;
+    }
+    
+    .recipe-glance-content {
+      flex-direction: column;
+    }
+  }
