@@ -14,7 +14,7 @@ form {
     border: 1px solid #ccc;
     border-radius: 5px;
     outline: none;
-  } */
+  } 
   
   input:focus {
     border-color: #e87b71;
@@ -28,7 +28,7 @@ form {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background 0.3s;
+    /* transition: background 0.3s; */
   }
   
   button:disabled {

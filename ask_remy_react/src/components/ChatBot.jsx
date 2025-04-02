@@ -2,282 +2,134 @@ import React, { useState, useEffect, useRef } from 'react';
 import './ChatBot.css';
 
 const ChatBot = ({ recipeContext }) => {
-  const [messages, setMessages] = useState([]);
-  const [inputText, setInputText] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [showChatbot, setShowChatbot] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [voiceEnabled, setVoiceEnabled] = useState(false);
-  const messagesEndRef = useRef(null);
+  const [transcript, setTranscript] = useState('');
+  const [question, setQuestion] = useState('');
+  const [isThinking, setIsThinking] = useState(false);
+  const [response, setResponse] = useState('');
+  const [apiKey, setApiKey] = useState('');
   const recognitionRef = useRef(null);
-  const audioContextRef = useRef(null);
-  const analyserRef = useRef(null);
-  const microphoneStreamRef = useRef(null);
-  const wakeDetectionTimerRef = useRef(null);
-  const wakePhraseDetectedRef = useRef(false);
+  const popupRef = useRef(null);
 
-  // Load API key from localStorage on component mount
+  // Load API key on mount
   useEffect(() => {
     const savedApiKey = localStorage.getItem('GEMINI_API_KEY');
     if (savedApiKey) {
       setApiKey(savedApiKey);
     }
-    
-    // Check if voice functionality is supported
-    const voiceSupported = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
-    setVoiceEnabled(voiceSupported);
-    
+
+    // Start listening for wake word
+    startWakeWordDetection();
+
+    // Cleanup on unmount
     return () => {
-      // Clean up voice recognition on unmount
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
-      stopMicrophoneProcessing();
     };
   }, []);
 
-  // Auto-scroll to the bottom of the chat when messages update
-  useEffect(() => {
-    if (messagesEndRef.current && showChatbot) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+  // Handle wake word detection
+  const startWakeWordDetection = () => {
+    // Check if speech recognition is supported
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      console.log('Speech recognition not supported');
+      return;
     }
-  }, [messages, showChatbot]);
 
-  // Initialize speech synthesis
-  const speak = (text) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-      utterance.volume = 1.0;
-      
-      // Get available voices and try to set a neutral voice
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 0) {
-        // Try to find a neutral English voice
-        const englishVoice = voices.find(voice => 
-          voice.lang.includes('en') && voice.name.includes('Google') && !voice.name.includes('Female')
-        ) || voices[0];
-        utterance.voice = englishVoice;
-      }
-      
-      window.speechSynthesis.speak(utterance);
-    }
-  };
-
-  // Initialize wake word detection with audio processing
-  const startMicrophoneProcessing = async () => {
-    try {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      
-      const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      microphoneStreamRef.current = micStream;
-      
-      analyserRef.current = audioContextRef.current.createAnalyser();
-      analyserRef.current.fftSize = 256;
-      
-      const source = audioContextRef.current.createMediaStreamSource(micStream);
-      source.connect(analyserRef.current);
-      
-      // Start continuous monitoring for wake word activation
-      detectActivation();
-      
-    } catch (error) {
-      console.error("Error accessing microphone:", error);
-      setVoiceEnabled(false);
-    }
-  };
-  
-  const stopMicrophoneProcessing = () => {
-    if (microphoneStreamRef.current) {
-      microphoneStreamRef.current.getTracks().forEach(track => track.stop());
-      microphoneStreamRef.current = null;
-    }
-    
-    if (wakeDetectionTimerRef.current) {
-      clearTimeout(wakeDetectionTimerRef.current);
-    }
-    
-    if (audioContextRef.current && audioContextRef.current.state === 'running') {
-      audioContextRef.current.suspend();
-    }
-  };
-  
-  // Simple audio activity detection to save resources
-  const detectActivation = () => {
-    if (!analyserRef.current || !voiceEnabled) return;
-    
-    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-    analyserRef.current.getByteFrequencyData(dataArray);
-    
-    // Calculate average volume level
-    const average = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
-    
-    // If we detect significant audio activity, start the wake word recognition
-    if (average > 20 && !isListening && !wakePhraseDetectedRef.current) {
-      startWakeWordRecognition();
-    }
-    
-    wakeDetectionTimerRef.current = setTimeout(detectActivation, 500);
-  };
-  
-  // Setup and start speech recognition for wake word detection
-  const startWakeWordRecognition = () => {
-    console.log("startWakeWordRecognition");
-    if (!voiceEnabled) return;
-    
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-    
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-    
     const recognition = new SpeechRecognition();
     recognitionRef.current = recognition;
-    
+
+    // Configure recognition
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
-    
+
     recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript.toLowerCase();
-      console.log("Heard:", transcript);
+      let interimTranscript = '';
       
-      // Check for wake phrase "Hey Remy"
-      if (transcript.includes("hey remy") || transcript.includes("hey remmy") || 
-          transcript.includes("hay remy") || transcript.includes("hey remi")) {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
         
-        wakePhraseDetectedRef.current = true;
-        handleWakePhraseDetected();
+        if (event.results[i].isFinal) {
+          // Check for wake word
+          if (transcript.toLowerCase().includes('hey remy')) {
+            const questionMatch = transcript.toLowerCase().match(/hey remy,?\s*(.*)/i);
+            const questionText = questionMatch ? questionMatch[1].trim() : '';
+            
+            // Open popup
+            setShowPopup(true);
+            
+            if (questionText) {
+              // Process question
+              setQuestion(questionText);
+              processQuestion(questionText);
+            } else {
+              setResponse("I'm listening. How can I help with your recipe?");
+            }
+          }
+        } else {
+          interimTranscript += transcript;
+        }
       }
-    };
-    
-    recognition.onend = () => {
-      if (!wakePhraseDetectedRef.current) {
-        // If wake phrase not detected, continue passive listening
-        wakeDetectionTimerRef.current = setTimeout(detectActivation, 500);
-      }
-    };
-    
-    recognition.onerror = (event) => {
-      console.error("Speech recognition error:", event.error);
-      wakeDetectionTimerRef.current = setTimeout(detectActivation, 1000);
-    };
-    
-    recognition.start();
-    setIsListening(true);
-  };
-  
-  // Handle wake phrase detection
-  const handleWakePhraseDetected = () => {
-    // Visual feedback that we heard the wake phrase
-    setShowChatbot(true);
-    
-    // Add assistant message indicating it's listening
-    const assistantMessage = {
-      text: "I'm listening. How can I help with your recipe?",
-      sender: 'bot',
-      timestamp: new Date().toLocaleTimeString()
-    };
-    
-    setMessages(prevMessages => [...prevMessages, assistantMessage]);
-    speak("I'm listening. How can I help with your recipe?");
-    
-    // Start listening for the actual command
-    startCommandRecognition();
-  };
-  
-  // Listen for the user's command after wake word detected
-  const startCommandRecognition = () => {
-    if (!voiceEnabled) return;
-    
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-    
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-    
-    const recognition = new SpeechRecognition();
-    recognitionRef.current = recognition;
-    
-    setIsListening(true);
-    
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
-    
-    recognition.onresult = (event) => {
-      const command = event.results[0][0].transcript;
       
-      // Process the command
-      setInputText(command);
-      sendMessage(command);
+      setTranscript(interimTranscript);
     };
-    
-    recognition.onend = () => {
-      setIsListening(false);
-      wakePhraseDetectedRef.current = false;
-      // Resume passive listening for wake word
-      wakeDetectionTimerRef.current = setTimeout(detectActivation, 1000);
-    };
-    
+
     recognition.onerror = (event) => {
-      console.error("Speech recognition error:", event.error);
-      setIsListening(false);
-      wakePhraseDetectedRef.current = false;
-      wakeDetectionTimerRef.current = setTimeout(detectActivation, 1000);
+      console.error('Speech recognition error:', event.error);
+      // Restart after brief delay
+    //   setTimeout(() => {
+    //     if (recognitionRef.current) {
+    //       recognition.start();
+    //     }
+    //   }, 1000);
     };
-    
+
+    recognition.onend = () => {
+      // Restart to keep listening for wake word
+    //   setTimeout(() => {
+    //     if (recognitionRef.current) {
+    //       recognition.start();
+    //     }
+    //   }, 500);
+    };
+
+    // Start listening
     recognition.start();
+    setIsListening(true);
   };
 
-  const handleInputChange = (e) => {
-    setInputText(e.target.value);
-  };
+  // Process the question
+  const processQuestion = async (questionText) => {
+    // Reset state
+    setIsThinking(true);
+    setResponse('');
 
-  const promptForApiKey = () => {
-    const newApiKey = prompt('Enter your Gemini API key:');
-    if (newApiKey) {
-      localStorage.setItem('GEMINI_API_KEY', newApiKey);
-      setApiKey(newApiKey);
-      return newApiKey;
-    }
-    return null;
-  };
-
-  const sendMessage = async (message = null) => {
-    const textToSend = message || inputText.trim();
-    if (!textToSend) return;
-    
-    // Get or prompt for API key
+    // Check for API key
     let currentApiKey = apiKey;
     if (!currentApiKey) {
-      currentApiKey = promptForApiKey();
-      if (!currentApiKey) return;
+      const newApiKey = prompt('Enter your Gemini API key:');
+      if (newApiKey) {
+        localStorage.setItem('GEMINI_API_KEY', newApiKey);
+        setApiKey(newApiKey);
+        currentApiKey = newApiKey;
+      } else {
+        setIsThinking(false);
+        setResponse("I need an API key to answer your question.");
+        return;
+      }
     }
 
-    // Add user message to chat
-    const userMessage = {
-      text: textToSend,
-      sender: 'user',
-      timestamp: new Date().toLocaleTimeString()
-    };
-    
-    setMessages(prevMessages => [...prevMessages, userMessage]);
-    setInputText('');
-    setIsLoading(true);
-
     try {
-      // Prepare context about the recipe for better responses
+      // Create context prompt
       const contextPrompt = `I'm cooking "${recipeContext.title}". 
       It's a ${recipeContext.difficulty} difficulty recipe that serves ${recipeContext.servings} and takes ${recipeContext.cookTime} to prepare. 
-      Here's my question: ${textToSend}`;
+      Here's my question: ${questionText}`;
 
+      // Send request to Gemini API
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${currentApiKey}`,
         {
@@ -291,151 +143,121 @@ const ChatBot = ({ recipeContext }) => {
 
       const data = await response.json();
       
-      // Handle the response
+      // Extract response text
       const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 
-        "I'm having trouble connecting to the assistant. Please check your API key or try again later.";
+        "I'm having trouble connecting. Please check your API key.";
       
-      const botMessage = {
-        text: responseText,
-        sender: 'bot',
-        timestamp: new Date().toLocaleTimeString()
-      };
-      
-      setMessages(prevMessages => [...prevMessages, botMessage]);
-      
-      // Read out the response
-      speak(responseText);
-      
-    } catch (error) {
-      // Add error message to chat
-      const errorMessage = {
-        text: `Error: ${error.message}. Please check your API key or network connection.`,
-        sender: 'bot',
-        timestamp: new Date().toLocaleTimeString()
-      };
-      
-      setMessages(prevMessages => [...prevMessages, errorMessage]);
-      speak("I'm sorry, I encountered an error. Please check your API key or network connection.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      // Update state
+      setResponse(responseText);
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      sendMessage();
-    }
-  };
-
-  const toggleChatbot = () => {
-    setShowChatbot(!showChatbot);
-  };
-
-  const toggleVoiceListening = () => {
-    if (isListening) {
-      // Stop listening
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
+      // Read response aloud
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(responseText);
+        window.speechSynthesis.speak(utterance);
       }
-      stopMicrophoneProcessing();
-      setIsListening(false);
-    } else {
-      // Start listening
-      startMicrophoneProcessing();
-      setIsListening(true);
-      
-      // Add a message to let the user know voice is active
-      const systemMessage = {
-        text: "Voice assistant activated. Say 'Hey Remy' to get my attention.",
-        sender: 'bot',
-        timestamp: new Date().toLocaleTimeString()
-      };
-      setMessages(prevMessages => [...prevMessages, systemMessage]);
+    } catch (error) {
+      setResponse(`Error: ${error.message}. Please check your API key or connection.`);
+    } finally {
+      setIsThinking(false);
     }
+  };
+
+  // Manual trigger
+  const handleButtonClick = () => {
+    setShowPopup(true);
+    setQuestion('');
+    setResponse("I'm listening. What would you like to know about your recipe?");
   };
 
   return (
-    <div className="chatbot-container">
-      <div className="chatbot-controls">
-        <button 
-          className="chatbot-toggle" 
-          onClick={toggleChatbot}
-        >
-          {showChatbot ? "Hide Recipe Assistant" : "Show Recipe Assistant"}
-        </button>
-        
-        {voiceEnabled && (
-          <button 
-            className={`voice-toggle ${isListening ? 'listening' : ''}`}
-            onClick={toggleVoiceListening}
-            title={isListening ? "Turn off voice assistant" : "Turn on voice assistant"}
-          >
-            {isListening ? "Voice Listening..." : "Enable Voice"}
-            <span className={`microphone-icon ${isListening ? 'active' : ''}`}>
-              🎤
-            </span>
-          </button>
-        )}
+    <div className="voice-assistant-container">
+      {/* Button to manually trigger assistant */}
+      <button 
+        className="assistant-button" 
+        onClick={handleButtonClick}
+      >
+        Ask Remy
+      </button>
+      
+      {/* Listening status indicator */}
+      <div className="listening-status">
+        <span className={`status-indicator ${isListening ? 'active' : ''}`}></span>
+        <span>Listening for "Hey Remy"</span>
       </div>
       
-      {showChatbot && (
-        <div className="chatbot-window">
-          <div className="chatbot-header">
-            <h3>Remy - Your Recipe Assistant</h3>
-            {isListening && <div className="listening-indicator">Listening for "Hey Remy"</div>}
-          </div>
-          
-          <div className="chatbot-messages">
-            {messages.length === 0 ? (
-              <div className="welcome-message">
-                <p>Hi there! I'm Remy, your recipe assistant. Ask me anything about cooking 
-                "{recipeContext.title}" or get help with substitutions, techniques, or tips!</p>
-                {voiceEnabled && (
-                  <p className="voice-hint">Try saying "Hey Remy" followed by your question for hands-free help!</p>
-                )}
-              </div>
-            ) : (
-              messages.map((msg, index) => (
-                <div 
-                  key={index} 
-                  className={`message ${msg.sender === 'user' ? 'user-message' : 'bot-message'}`}
-                >
-                  <div className="message-content">{msg.text}</div>
-                  <div className="message-timestamp">{msg.timestamp}</div>
-                </div>
-              ))
-            )}
-            {isLoading && (
-              <div className="loading-indicator">
-                <div className="loading-spinner"></div>
-                <span>Thinking...</span>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-          
-          <div className="chatbot-input">
-            <input
-              type="text"
-              value={inputText}
-              onChange={handleInputChange}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask about this recipe..."
-              disabled={isLoading}
-            />
+      {/* Popup overlay */}
+      {showPopup && (
+        <div className="recipe-glance-overlay">
+          <div className="recipe-glance-modal" ref={popupRef}>
             <button 
-              onClick={() => sendMessage()}
-              disabled={isLoading || !inputText.trim()}
+              className="close-button" 
+              onClick={() => setShowPopup(false)}
             >
-              Send
+              ×
             </button>
-          </div>
-          
-          {!apiKey && (
-            <div className="api-key-notice">
-              <p>You'll need to provide a Gemini API key to use the assistant.</p>
+            
+            <div className="recipe-glance-header">
+              <h2>Remy - Your Recipe Assistant</h2>
+              <p className="recipe-subtitle">
+                {question ? 'Your question:' : 'How can I help you?'}
+              </p>
             </div>
-          )}
+            
+            <div className="recipe-glance-content">
+              {/* Question display */}
+              {question && (
+                <div className="question-container">
+                  <p className="question-text">{question}</p>
+                </div>
+              )}
+              
+              {/* Thinking state */}
+              {isThinking && (
+                <div className="thinking-container">
+                  <div className="thinking-indicator">
+                    <span></span><span></span><span></span>
+                  </div>
+                  <p>Thinking about your question...</p>
+                </div>
+              )}
+              
+              {/* Response display */}
+              {!isThinking && response && (
+                <div className="response-container">
+                  <div className="response-text">
+                    {response}
+                  </div>
+                </div>
+              )}
+              
+              {/* Voice transcript display */}
+              {transcript && (
+                <div className="transcript-container">
+                  <p className="transcript-label">Currently hearing:</p>
+                  <p className="transcript-text">{transcript}</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="recipe-glance-actions">
+              <button 
+                className="secondary-button"
+                onClick={() => setShowPopup(false)}
+              >
+                Close
+              </button>
+              
+              {question && (
+                <button 
+                  className="primary-button"
+                  onClick={() => processQuestion(question)}
+                  disabled={isThinking}
+                >
+                  Ask Again
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

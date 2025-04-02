@@ -82,7 +82,7 @@ const RecipeViewPage = () => {
         
         <div className="chatbot-section">
           <ChatBot recipeContext={recipe} />
-          <VoiceBot recipeContext={recipe} />
+          {/* <VoiceBot recipeContext={recipe} /> */}
         </div>
       </div>
     </div>
