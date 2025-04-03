@@ -18,6 +18,12 @@
     width: 100%;
     margin-bottom: 20px;
   }
+
+  .recipe-header p {
+    margin: 10px 0; /* Space between each piece of text */
+    font-size: 1rem;
+    color: #333;
+    }
   
   .recipe-body {
     display: flex;
@@ -34,8 +40,8 @@
   }
   
   .recipe-image {
-    width: 80px;
-    height: 80px;
+    width: 120px;
+    height: 120px;
     object-fit: cover;
     border-radius: 8px;
     margin-bottom: 20px;
@@ -52,6 +58,12 @@
   .chatbot-section {
     margin-top: 20px;
     width: 100%;
+  }
+
+  .recipe-header {
+    display: flex;
+    align-items: center;
+    gap: 0px; /* Adjust spacing between the image and title */
   }
   
   

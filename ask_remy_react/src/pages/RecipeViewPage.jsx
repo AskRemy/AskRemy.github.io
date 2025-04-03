@@ -43,25 +43,34 @@ const RecipeViewPage = () => {
       <Header />
       <div className="recipe-content">
         <div className="recipe-header">
-          <h1>{recipe.title}</h1>
+          {/* <h1>{recipe.title}</h1> */}
+          <ChatBot recipeContext={recipe} />
+
           <button onClick={handleSaveRecipe}>Save Recipe</button>
         </div>
 
         <div className="recipe-body">
           {/* Column 1: Recipe Image and Nutritional Info */}
           <div className="recipe-column">
-            <img 
-              src={recipe.image} 
-              alt={recipe.title} 
-              className="recipe-image" 
-            />
-            <div className="recipe-info">
-              <p><strong>Time to Cook:</strong> {recipe.cookTime}</p>
-              <p><strong>Difficulty Level:</strong> {recipe.difficulty}</p>
-              <p><strong>Servings:</strong> {recipe.servings}</p>
-              <NutritionInfo nutrients={recipe.nutrients} />
-              <IngredientsList ingredients={recipe.ingredients} />
+          <h1>{recipe.title}</h1>
+            <div className="recipe-header">
+                <img 
+                src={recipe.image} 
+                alt={recipe.title} 
+                className="recipe-image" 
+                />
 
+                <div className="recipe-description">
+                    <p><strong>Time to Prep:</strong> {recipe.prep_time} mins</p>
+                    <p><strong>Time to Cook:</strong> {recipe.cook_time} mins</p>
+                    <p><strong>Difficulty Level:</strong> {recipe.difficulty}</p>    
+                    <p><strong>Servings:</strong> {recipe.yields}</p>
+                </div>
+            </div>
+            <div className="recipe-info">
+
+              <IngredientsList ingredients={recipe.ingredients} />
+              <NutritionInfo nutrients={recipe.nutrients} />
             </div>
           </div>
 
@@ -81,7 +90,7 @@ const RecipeViewPage = () => {
         </div>
         
         <div className="chatbot-section">
-          <ChatBot recipeContext={recipe} />
+          {/* <ChatBot recipeContext={recipe} /> */}
           {/* <VoiceBot recipeContext={recipe} /> */}
         </div>
       </div>

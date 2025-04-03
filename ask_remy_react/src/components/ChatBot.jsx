@@ -183,7 +183,7 @@ const ChatBot = ({ recipeContext }) => {
       {/* Listening status indicator */}
       <div className="listening-status">
         <span className={`status-indicator ${isListening ? 'active' : ''}`}></span>
-        <span>Listening for "Hey Remy"</span>
+        <span>Say "Hey Remy" for hands-free assistance</span>
       </div>
       
       {/* Popup overlay */}
