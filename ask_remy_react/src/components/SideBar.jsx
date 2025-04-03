@@ -3,16 +3,16 @@ import './SideBar.css';
 
 // Mock data for the sidebar
 const mockSavedRecipes = [
-  { id: 1, title: 'Spaghetti Carbonara', image: '/assets/spagetti_carbonara.jpg' },
-  { id: 2, title: 'Chicken Tikka Masala', image: '/assets/chicken_tikka.jpg' },
-  { id: 3, title: 'Beef Tacos', image: '/assets/beef_tacos.jpg' },
-  { id: 4, title: 'Vegetable Stir Fry', image: '/assets/vegetable_stir_fry.jpg' }
+  { id: 1, title: 'Spaghetti Carbonara', image: '/assets/spagetti_carbonara.jpg', prep_time: '5', cook_time: '30', yields: 4, difficulty: 'Insane' },
+  { id: 2, title: 'Chicken Tikka Masala', image: '/assets/chicken_tikka.jpg', prep_time: '5', cook_time: '30', yields: 4, difficulty: 'Godlike' },
+  { id: 3, title: 'Beef Tacos', image: '/assets/beef_tacos.jpg', prep_time: '5', cook_time: '30', yields: 4, difficulty: 'Extreme' },
+  { id: 4, title: 'Vegetable Stir Fry', image: '/assets/vegetable_stir_fry.jpg', prep_time: '5', cook_time: '30', yields: 4, difficulty: 'Insane' }
 ];
 
 const mockRecentRecipes = [
-  { id: 5, title: 'Banana Bread', image: '/assets/banana_bread.jpg' },
-  { id: 2, title: 'Chicken Tikka Masala', image: '/assets/chicken_tikka.jpg' },
-  { id: 6, title: 'Mushroom Risotto', image: '/assets/mushroom_risoto.jpg' }
+  { id: 5, title: 'Banana Bread', image: '/assets/banana_bread.jpg', prep_time: '5', cook_time: '30', yields: 4, difficulty: 'Insane'  },
+  { id: 2, title: 'Chicken Tikka Masala', image: '/assets/chicken_tikka.jpg', prep_time: '5', cook_time: '30', yields: 4, difficulty: 'Insane'  },
+  { id: 6, title: 'Mushroom Risotto', image: '/assets/mushroom_risoto.jpg', prep_time: '5', cook_time: '30', yields: 4, difficulty: 'Insane'  }
 ];
 
 const SideBar = ({ onRecipeSelect }) => {

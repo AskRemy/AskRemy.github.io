@@ -90,6 +90,7 @@ const ChatBot = ({ recipeContext }) => {
 
     recognition.onend = () => {
       // Restart to keep listening for wake word
+      console.error('Recognition end:');
     //   setTimeout(() => {
     //     if (recognitionRef.current) {
     //       recognition.start();

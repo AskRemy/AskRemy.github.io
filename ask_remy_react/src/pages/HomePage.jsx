@@ -112,8 +112,19 @@ const HomePage = () => {
           <h2></h2>
           <h2></h2>
           <h2></h2>
-          <h2>About AskRemy</h2>
-          <p>This is the about section...</p>
+          <h2>About <span style={{ color: "#E74C3D" }}>AskRemy</span></h2>
+          <p class="quote">"I don't wanna eat garbage dad..." – <span>Remy, Ratatouille</span></p>
+          <p>AskRemy is built for cooks who want <strong>simple, concise, and ad-free</strong> access to recipes—without the clutter. Whether you're trying a new dish or revisiting a favorite, our hands-free mode keeps your focus on cooking, not scrolling.</p>
+
+          <ul class="features">
+            <li>📌 <strong>Favorite recipes</strong> to keep them handy.</li>
+            <li>🔍 <strong>Scrape key details</strong> from recipes you’ve found online.</li>
+            <li>🎙️ <strong>Go hands-free</strong> with guided cooking assistance.</li>
+         </ul>
+
+         <p>Using a recipe should be effortless. Let AskRemy handle the details while you bring the magic to the kitchen.</p>
+
+          
         
           {error && <div className="error-message">{error}</div>}
         

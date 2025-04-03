@@ -7,7 +7,7 @@ const RecipeGlance = ({ recipe, onClose, onLaunch }) => {
     title: 'Spaghetti Carbonara',
     image: 'https://via.placeholder.com/400x300',
     prepTime: '15 mins',
-    cookTime: '20 mins',
+    cook_time: '20 mins',
     servings: 4,
     ingredients: [
       '400g spaghetti',
@@ -26,15 +26,18 @@ const RecipeGlance = ({ recipe, onClose, onLaunch }) => {
     ],
     difficulty: 'Medium'
   };
-
+  
   // Use provided recipe or fall back to mock data
   const recipeData = recipe || mockRecipe;
-  
+    
   // Display only the first 5 ingredients in the glance view
-  const previewIngredients = recipeData.ingredients ? 
-    recipeData.ingredients.slice(0, 5) : 
-    mockRecipe.ingredients.slice(0, 5);
+  const previewIngredients = recipeData.ingredients ?
+    recipeData.ingredients.slice(0, 7) :
+    mockRecipe.ingredients.slice(0, 7);
 
+
+  console.log(recipeData)
+  
   return (
     <div className="recipe-glance-overlay">
       <div className="recipe-glance-modal">
@@ -46,30 +49,32 @@ const RecipeGlance = ({ recipe, onClose, onLaunch }) => {
         </div>
         
         <div className="recipe-glance-content">
-          <div className="recipe-glance-image">
-            <img src={recipeData.image} alt={recipeData.title} />
-          </div>
-          
-          <div className="recipe-glance-details">
+          <div className="recipe-glance-image-container">
+            <div className="recipe-glance-image">
+              <img src={recipeData.image} alt={recipeData.title} />
+            </div>
+            
             <div className="recipe-meta">
               <div className="meta-item">
                 <span className="meta-label">Prep Time</span>
-                <span className="meta-value">{recipeData.prepTime}</span>
+                <span className="meta-value">{recipeData.prep_time} mins</span>
               </div>
               <div className="meta-item">
                 <span className="meta-label">Cook Time</span>
-                <span className="meta-value">{recipeData.cookTime}</span>
+                <span className="meta-value">{recipeData.cook_time} mins</span>
               </div>
               <div className="meta-item">
                 <span className="meta-label">Servings</span>
-                <span className="meta-value">{recipeData.servings}</span>
+                <span className="meta-value">{recipeData.yields}</span>
               </div>
               <div className="meta-item">
                 <span className="meta-label">Difficulty</span>
-                <span className="meta-value">{recipeData.difficulty}</span>
+                <span className="meta-value">{recipeData.difficulty || "Extreme"}</span>
               </div>
             </div>
-            
+          </div>
+          
+          <div className="recipe-glance-details">
             <div className="recipe-glance-ingredients">
               <h3>Main Ingredients</h3>
               <ul>
@@ -77,18 +82,20 @@ const RecipeGlance = ({ recipe, onClose, onLaunch }) => {
                   <li key={index}>{ingredient}</li>
                 ))}
               </ul>
-              {recipeData.ingredients && recipeData.ingredients.length > 5 && (
-                <p className="more-info">+{recipeData.ingredients.length - 5} more ingredients</p>
+              {recipeData.ingredients && recipeData.ingredients.length > 7 && (
+                <p className="more-info">+{recipeData.ingredients.length - 7} more ingredients</p>
               )}
             </div>
+
+            <h3></h3>
             
             <div className="recipe-glance-equipment">
               <h3>Equipment Needed</h3>
               <ul>
-                {recipeData.equipment ? 
+                {recipeData.equipment ?
                   recipeData.equipment.map((item, index) => (
                     <li key={index}>{item}</li>
-                  )) : 
+                  )) :
                   mockRecipe.equipment.map((item, index) => (
                     <li key={index}>{item}</li>
                   ))

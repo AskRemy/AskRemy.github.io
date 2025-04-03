@@ -69,9 +69,16 @@
     gap: 20px;
   }
   
-  .recipe-glance-image {
+  .recipe-glance-image-container {
     flex: 1;
     min-width: 300px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .recipe-glance-image {
+    width: 100%;
+    margin-bottom: 15px;
   }
   
   .recipe-glance-image img {
