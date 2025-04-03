@@ -46,7 +46,7 @@ const RecipeViewPage = () => {
           {/* <h1>{recipe.title}</h1> */}
           <ChatBot recipeContext={recipe} />
 
-          <button onClick={handleSaveRecipe}>Save Recipe</button>
+          <button onClick={handleSaveRecipe}>Add to Favorites</button>
         </div>
 
         <div className="recipe-body">
