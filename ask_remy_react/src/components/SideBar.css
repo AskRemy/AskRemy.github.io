@@ -64,6 +64,7 @@
     transition: background-color 0.2s;
     background-color: white;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    text-align: left;
   }
   
   .recipe-item:hover {
@@ -95,4 +96,17 @@
       border-right: none;
       border-bottom: 1px solid #e9ecef;
     }
+  }
+
+  .recipe-date {
+    font-size: 0.9rem;
+    color: #888;
+    display: block;
+    margin-top: 5px;
+  }
+
+  .recipe-info {
+    display: flex;
+    flex-direction: column; /* Stack title and date vertically */
+    justify-content: center; /* Center vertically */
   }

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { format } from 'date-fns';  // Import date formatting function
 import './SideBar.css';
+
 
 // Mock data for the sidebar
 const mockSavedRecipes = [
@@ -10,9 +12,9 @@ const mockSavedRecipes = [
 ];
 
 const mockRecentRecipes = [
-  { id: 5, title: 'Banana Bread', image: '/assets/banana_bread.jpg', prep_time: '5', cook_time: '30', yields: 4, difficulty: 'Insane', url: 'https://www.simplyrecipes.com/recipes/spaghetti_alla_carbonara/' },
-  { id: 2, title: 'Chicken Tikka Masala', image: '/assets/chicken_tikka.jpg', prep_time: '5', cook_time: '30', yields: 4, difficulty: 'Insane', url: 'https://www.simplyrecipes.com/recipes/spaghetti_alla_carbonara/'  },
-  { id: 6, title: 'Mushroom Risotto', image: '/assets/mushroom_risoto.jpg', prep_time: '5', cook_time: '30', yields: 4, difficulty: 'Insane', url: 'https://www.simplyrecipes.com/recipes/spaghetti_alla_carbonara/'  }
+  { id: 5, title: 'Banana Bread', image: '/assets/banana_bread.jpg', prep_time: '5', cook_time: '30', yields: 4, difficulty: 'Insane', url: 'https://www.simplyrecipes.com/recipes/spaghetti_alla_carbonara/', lastUsed: '2025-04-03T08:30:00Z'},
+  { id: 2, title: 'Chicken Tikka Masala', image: '/assets/chicken_tikka.jpg', prep_time: '5', cook_time: '30', yields: 4, difficulty: 'Insane', url: 'https://www.simplyrecipes.com/recipes/spaghetti_alla_carbonara/', lastUsed: '2025-03-25T08:30:00Z'},
+  { id: 6, title: 'Mushroom Risotto', image: '/assets/mushroom_risoto.jpg', prep_time: '5', cook_time: '30', yields: 4, difficulty: 'Insane', url: 'https://www.simplyrecipes.com/recipes/spaghetti_alla_carbonara/', lastUsed: '1923-02-14T08:30:00Z'}
 ];
 
 const SideBar = ({ onRecipeSelect }) => {
@@ -71,7 +73,13 @@ const SideBar = ({ onRecipeSelect }) => {
                 onClick={() => handleRecipeClick(recipe)}
               >
                 <img src={recipe.image} alt={recipe.title} className="recipe-thumb" />
-                <span className="recipe-title">{recipe.title}</span>
+                
+                <div className="recipe-info">
+                    <span className="recipe-title">{recipe.title}</span>
+                    <span className="recipe-date">
+                    {format(new Date(recipe.lastUsed), 'MMM dd, yyyy')}
+                    </span>
+                </div>
               </div>
             ))}
           </div>
