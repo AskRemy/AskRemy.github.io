@@ -52,6 +52,7 @@ const HomePage = () => {
       <div className="main-content">
         {<SideBar onRecipeSelect={handleSavedRecipeSelect} />}
         <div className="content-area">
+        <div className="content-inner">
           <h2>Find New Recipes</h2>
           {<UrlForm onSubmit={handleScrape} isLoading={isLoading} />}
           {error && <div className="error-message"><strong>{error}</strong></div>}
@@ -80,6 +81,7 @@ const HomePage = () => {
               onLaunch={handleLaunchRecipe}
             />
           )}
+        </div>
         </div>
       </div>
     </div>
