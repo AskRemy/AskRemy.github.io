@@ -13,37 +13,37 @@ function shortenURL(fullUrl) {
 
 const RecipeGlance = ({ recipe, onClose, onLaunch }) => {
   // Mock recipe data for preview if no recipe is provided
-  const mockRecipe = {
-    title: 'Spaghetti Carbonara',
-    image: 'https://via.placeholder.com/400x300',
-    prepTime: '15 mins',
-    cook_time: '20 mins',
-    servings: 4,
-    ingredients: [
-      '400g spaghetti',
-      '200g pancetta',
-      '3 large eggs',
-      '75g pecorino cheese',
-      '50g parmesan',
-      'Freshly ground black pepper',
-      '1 garlic clove (optional)'
-    ],
-    equipment: [
-      'Large pot',
-      'Frying pan',
-      'Mixing bowl',
-      'Tongs'
-    ],
-    difficulty: 'Medium'
-  };
+//   const mockRecipe = {
+//     title: 'Spaghetti Carbonara',
+//     image: 'https://via.placeholder.com/400x300',
+//     prepTime: '15 mins',
+//     cook_time: '20 mins',
+//     servings: 4,
+//     ingredients: [
+//       '400g spaghetti',
+//       '200g pancetta',
+//       '3 large eggs',
+//       '75g pecorino cheese',
+//       '50g parmesan',
+//       'Freshly ground black pepper',
+//       '1 garlic clove (optional)'
+//     ],
+//     equipment: [
+//       'Large pot',
+//       'Frying pan',
+//       'Mixing bowl',
+//       'Tongs'
+//     ],
+//     difficulty: 'Medium'
+//   };
+const placeholderEquipement = ['Large pot', 'Frying pan', 'Mixing bowl', 'Tongs'];
   
   // Use provided recipe or fall back to mock data
-  const recipeData = recipe || mockRecipe;
+  const recipeData = recipe;
     
   // Display only the first 5 ingredients in the glance view
-  const previewIngredients = recipeData.ingredients ?
-    recipeData.ingredients.slice(0, 7) :
-    mockRecipe.ingredients.slice(0, 7);
+  const previewIngredients = recipeData.ingredients.slice(0, 7);
+    
 
   const [isFavorited, setIsFavorited] = useState(false);
 
@@ -116,7 +116,7 @@ const RecipeGlance = ({ recipe, onClose, onLaunch }) => {
                   recipeData.equipment.map((item, index) => (
                     <li key={index}>{item}</li>
                   )) :
-                  mockRecipe.equipment.map((item, index) => (
+                  placeholderEquipement.map((item, index) => (
                     <li key={index}>{item}</li>
                   ))
                 }

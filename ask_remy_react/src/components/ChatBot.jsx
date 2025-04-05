@@ -1,151 +1,163 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './ChatBot.css';
+import GeminiService from '../services/GeminiService';
+import VoiceService from '../services/VoiceService';
 
-const ChatBot = ({ recipeContext }) => {
+const ChatBot = ({ recipeContext, completedSteps }) => {
+  // Component state
   const [showPopup, setShowPopup] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [question, setQuestion] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [response, setResponse] = useState('');
-  const [apiKey, setApiKey] = useState('');
-  const recognitionRef = useRef(null);
+  
+  // Service references
+  const geminiServiceRef = useRef(null);
+  const voiceServiceRef = useRef(null);
   const popupRef = useRef(null);
-
-  // Load API key on mount
+  
+  // Reference to completedSteps to ensure we always have the latest value
+  const completedStepsRef = useRef(completedSteps);
+  
+  // Update the ref whenever completedSteps changes
   useEffect(() => {
-    const savedApiKey = localStorage.getItem('GEMINI_API_KEY');
-    if (savedApiKey) {
-      setApiKey(savedApiKey);
+    completedStepsRef.current = completedSteps;
+  }, [completedSteps]);
+  
+  // Helper function to get completed steps string
+  const getCompletedStepsString = (stepsArray) => {
+    // Ensure steps is an array
+    const steps = Array.isArray(stepsArray) ? stepsArray : [];
+    
+    if (steps.length === 0) return "";
+    
+    const completedIndices = [];
+    for (let i = 0; i < steps.length; i++) {
+      if (steps[i] === true) {
+        completedIndices.push(i + 1);
+      }
     }
+    return completedIndices.join(', ');
+  };
+  
+  // Compute completed steps string whenever completedSteps changes
+  const completedStepsString = useMemo(() => {
+    return getCompletedStepsString(completedSteps);
+  }, [completedSteps]);
+  
+  // Debug logging
+  useEffect(() => {
+    console.log("Current completed steps string:", completedStepsString);
+  }, [completedStepsString]);
 
+  // Initialize services on mount
+  useEffect(() => {
+    // Initialize API service
+    geminiServiceRef.current = new GeminiService();
+    
+    // Initialize voice service with callbacks
+    voiceServiceRef.current = new VoiceService(
+      handleWakeWordDetected,
+      updateTranscript
+    );
+    
     // Start listening for wake word
-    startWakeWordDetection();
-
+    const listenerStarted = voiceServiceRef.current.startWakeWordDetection();
+    setIsListening(listenerStarted);
+    
     // Cleanup on unmount
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
+      if (voiceServiceRef.current) {
+        voiceServiceRef.current.stopListening();
       }
     };
   }, []);
 
-  useEffect(() => {
-    console.log('API Key:', apiKey); // This will log the updated apiKey after it changes
-  }, [apiKey]);
-
   // Handle wake word detection
-  const startWakeWordDetection = () => {
-    // Check if speech recognition is supported
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      console.log('Speech recognition not supported');
-      return;
+  const handleWakeWordDetected = (questionText) => {
+    setShowPopup(true);
+    
+    if (questionText) {
+      setQuestion(questionText);
+      processQuestion(questionText);
+    } else {
+      setResponse("I'm listening. How can I help with your recipe?");
     }
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognitionRef.current = recognition;
-
-    // Configure recognition
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-
-    recognition.onresult = (event) => {
-      let interimTranscript = '';
-      
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        
-        if (event.results[i].isFinal) {
-          // Check for wake word
-          if (transcript.toLowerCase().includes('hey remy')) {
-            const questionMatch = transcript.toLowerCase().match(/hey remy,?\s*(.*)/i);
-            const questionText = questionMatch ? questionMatch[1].trim() : '';
-
-            // console.log('questionMatch:', questionMatch);
-            // console.log('questionText:', questionText);
-            // console.log('transcript:', transcript);
-            
-            // Open popup
-            setShowPopup(true);
-            
-            if (questionText) {
-              // Process question
-              setQuestion(questionText);
-              processQuestion(questionText);
-            } else {
-              setResponse("I'm listening. How can I help with your recipe?");
-            }
-          }
-        } else {
-          interimTranscript += transcript;
-        }
-      }
-      
-      setTranscript(interimTranscript);
-    };
-
-    recognition.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
-      // Restart after brief delay
-    //   setTimeout(() => {
-    //     if (recognitionRef.current) {
-    //       recognition.start();
-    //     }
-    //   }, 1000);
-    };
-
-    recognition.onend = () => {
-      // Restart to keep listening for wake word
-      console.error('Recognition end:');
-    //   setTimeout(() => {
-    //     if (recognitionRef.current) {
-    //       recognition.start();
-    //     }
-    //   }, 500);
-    };
-
-    // Start listening
-    recognition.start();
-    setIsListening(true);
+  };
+  
+  // Update transcript from speech recognition
+  const updateTranscript = (text) => {
+    setTranscript(text);
   };
 
-  // Process the question
+  // Process the question and get a response
   const processQuestion = async (questionText) => {
     // Reset state
     setIsThinking(true);
     setResponse('');
+    
+    // Always use the latest completedSteps from ref
+    const currentCompletedSteps = completedStepsRef.current;
+    const currentCompletedStepsString = getCompletedStepsString(currentCompletedSteps);
+    
+    console.log("Processing question with completed steps:", currentCompletedStepsString);
 
-    // Get the current API key
-    let currentApiKey = apiKey;
+    try {
+      // Generate context with the current completed steps
+      const contextPrompt = generateContextPrompt(
+        recipeContext,
+        currentCompletedSteps,
+        questionText,
+        currentCompletedStepsString
+      );
+      
+      // Get API response
+      const result = await getApiResponse(contextPrompt);
+      
+      // Update state with response
+      setResponse(result.message);
+      
+      // Read response aloud
+      if (result.success) {
+        voiceServiceRef.current.speakResponse(result.message);
+      }
+    } catch (error) {
+      setResponse(`Error: ${error.message}. Please try again.`);
+    } finally {
+      setIsThinking(false);
+    }
+  };
+  
+  // Generate context prompt
+  const generateContextPrompt = (recipeContext, completedSteps, question, completedStepsString) => {
+    const instructions_string = recipeContext.instructions 
+      ? recipeContext.instructions.map((item, index) => `${index + 1}. ${item}`).join(', ') 
+      : '';
+      
+    const ingredients_string = recipeContext.ingredients 
+      ? recipeContext.ingredients.map((item, index) => `${index + 1}. ${item}`).join(', ') 
+      : '';
+
+    return `You are a cooking assistant helping me with their cooking related queries. Your duty is to answer as clearly, consisely, and encouraging as possible. 
+    I am cooking a recipe. I'm cooking "${recipeContext.title || 'a recipe'}". This recipe serves ${recipeContext.servings || 'unknown'} and takes ${recipeContext.prep_time || 'some time'} to prepare and ${recipeContext.cook_time || 'some time'} to cook.
+    The ingredients are as follows: ${ingredients_string}. The steps are as follows: ${instructions_string}. ${completedStepsString ? `The user has completed steps: ${completedStepsString}.` : 'The user hasn\'t completed any steps yet.'} 
+    Here's my question: ${question}`;
+  };
+  
+  // Get API response
+  const getApiResponse = async (contextPrompt) => {
+    // Use the service's API key management
+    const currentApiKey = await geminiServiceRef.current.getApiKey();
+    
     if (!currentApiKey) {
-        const savedApiKey = localStorage.getItem('GEMINI_API_KEY');
-        if (savedApiKey) {
-            currentApiKey = savedApiKey;
-            setApiKey(savedApiKey); // Update the state for future use
-        }
-        else {
-            const currentApiKey = prompt('Enter your Gemini API key:');
-            if (currentApiKey) {
-              localStorage.setItem('GEMINI_API_KEY', currentApiKey);
-              setApiKey(currentApiKey);
-              currentApiKey = currentApiKey;
-            } else {
-              setIsThinking(false);
-              setResponse("I need an API key to answer your question.");
-              return;
-            }
-        }
+      return {
+        success: false,
+        message: "I need an API key to answer your question."
+      };
     }
 
     try {
-      // Create context prompt
-      const contextPrompt = `I'm cooking "${recipeContext.title}". 
-      It's a ${recipeContext.difficulty} difficulty recipe that serves ${recipeContext.servings} and takes ${recipeContext.cookTime} to prepare. 
-      Here's my question: ${questionText}`;
-
-      // Send request to Gemini API
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${currentApiKey}`,
         {
@@ -160,25 +172,32 @@ const ChatBot = ({ recipeContext }) => {
       const data = await response.json();
       
       // Extract response text
-      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 
+      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text ||
         "I'm having trouble connecting. Please check your API key.";
-      
-      // Update state
-      setResponse(responseText);
 
-      // Read response aloud
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(responseText);
-        window.speechSynthesis.speak(utterance);
+      // If response indicates API key issue, clear the API key
+      if (responseText === "I'm having trouble connecting. Please check your API key.") {
+        geminiServiceRef.current.clearApiKey();
+        return {
+          success: false,
+          message: responseText
+        };
       }
+      
+      return {
+        success: true,
+        message: responseText
+      };
     } catch (error) {
-      setResponse(`Error: ${error.message}. Please check your API key or connection.`);
-    } finally {
-      setIsThinking(false);
+      geminiServiceRef.current.clearApiKey();
+      return {
+        success: false,
+        message: `Error: ${error.message}. Please check your API key or connection.`
+      };
     }
   };
 
-  // Manual trigger
+  // Manual trigger button handler
   const handleButtonClick = () => {
     setShowPopup(true);
     setQuestion('');
