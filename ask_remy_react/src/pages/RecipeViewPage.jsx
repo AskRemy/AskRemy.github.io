@@ -30,10 +30,13 @@ const RecipeViewPage = () => {
     setCompletedSteps(newCompletedSteps);
   };
 
+  const [isFavorited, setIsFavorited] = useState(false);
+
   const handleSaveRecipe = () => {
-    if (recipe) {
-      saveRecipe(recipe);
-    }
+    // if (recipe) {
+    //   saveRecipe(recipe);
+    // }
+    setIsFavorited(!isFavorited);
   };
 
   if (!recipe) return <div>Loading...</div>;
@@ -46,7 +49,7 @@ const RecipeViewPage = () => {
           {/* <h1>{recipe.title}</h1> */}
           <ChatBot recipeContext={recipe} />
 
-          <button onClick={handleSaveRecipe}>Add to Favorites</button>
+          <button onClick={handleSaveRecipe}>{isFavorited ? 'Remove from Favorites' : 'Add to Favorites'}</button>
         </div>
 
         <div className="recipe-body">
