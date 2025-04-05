@@ -220,6 +220,14 @@
     justify-content: flex-end;
     gap: 10px;
   }
+
+  .recipe-glance-actions-left {
+    padding: 15px 20px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+  }
   
   .primary-button {
     background-color: #e74c3c;

@@ -5,22 +5,21 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
     display: flex;
-    align-items: center;
     justify-content: center;
-    z-index: 1000;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5); /* Dark background overlay */
   }
   
   .recipe-glance-modal {
-    background-color: white;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 800px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     position: relative;
+    background-color: white;
+    width: 80%;
+    max-width: 600px;
+    max-height: 90%;
+    overflow-y: auto; /* Make the content scrollable */
+    display: flex;
+    flex-direction: column;
   }
   
   .close-button {
@@ -154,8 +153,16 @@
     padding: 15px 20px;
     border-top: 1px solid #e9ecef;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 10px;
+    width: 95%;
+    position: sticky;
+    bottom: 0;
+    background-color: white; /* Ensure the footer has a solid background */
+  }
+  
+  .recipe-glance-actions .secondary-button:first-child {
+    margin-right: auto; /* Push the first button (Favorite Recipe) to the left */
   }
   
   .primary-button {

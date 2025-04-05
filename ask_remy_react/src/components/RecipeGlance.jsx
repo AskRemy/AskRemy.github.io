@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './RecipeGlance.css';
 
 function shortenURL(fullUrl) {
@@ -45,8 +45,14 @@ const RecipeGlance = ({ recipe, onClose, onLaunch }) => {
     recipeData.ingredients.slice(0, 7) :
     mockRecipe.ingredients.slice(0, 7);
 
+  const [isFavorited, setIsFavorited] = useState(false);
 
-  console.log(recipeData)
+  const handleFavoriteClick = () => {
+    setIsFavorited(!isFavorited); // Toggle the favorited state
+  };
+
+
+//   console.log(recipeData)
   
   return (
     <div className="recipe-glance-overlay">
@@ -118,8 +124,14 @@ const RecipeGlance = ({ recipe, onClose, onLaunch }) => {
             </div>
           </div>
         </div>
+    
+
         
         <div className="recipe-glance-actions">
+            
+        <button className="secondary-button" onClick={handleFavoriteClick}>{isFavorited ? 'Remove from Favorites' : 'Add to Favorites'}</button> 
+
+          
           <button className="secondary-button" onClick={onClose}>Cancel</button>
           <button className="primary-button" onClick={onLaunch}>
             Launch Interactive Recipe
