@@ -30,6 +30,10 @@ const ChatBot = ({ recipeContext }) => {
     };
   }, []);
 
+  useEffect(() => {
+    console.log('API Key:', apiKey); // This will log the updated apiKey after it changes
+  }, [apiKey]);
+
   // Handle wake word detection
   const startWakeWordDetection = () => {
     // Check if speech recognition is supported
@@ -58,6 +62,10 @@ const ChatBot = ({ recipeContext }) => {
           if (transcript.toLowerCase().includes('hey remy')) {
             const questionMatch = transcript.toLowerCase().match(/hey remy,?\s*(.*)/i);
             const questionText = questionMatch ? questionMatch[1].trim() : '';
+
+            // console.log('questionMatch:', questionMatch);
+            // console.log('questionText:', questionText);
+            // console.log('transcript:', transcript);
             
             // Open popup
             setShowPopup(true);
@@ -109,19 +117,26 @@ const ChatBot = ({ recipeContext }) => {
     setIsThinking(true);
     setResponse('');
 
-    // Check for API key
+    // Get the current API key
     let currentApiKey = apiKey;
     if (!currentApiKey) {
-      const newApiKey = prompt('Enter your Gemini API key:');
-      if (newApiKey) {
-        localStorage.setItem('GEMINI_API_KEY', newApiKey);
-        setApiKey(newApiKey);
-        currentApiKey = newApiKey;
-      } else {
-        setIsThinking(false);
-        setResponse("I need an API key to answer your question.");
-        return;
-      }
+        const savedApiKey = localStorage.getItem('GEMINI_API_KEY');
+        if (savedApiKey) {
+            currentApiKey = savedApiKey;
+            setApiKey(savedApiKey); // Update the state for future use
+        }
+        else {
+            const currentApiKey = prompt('Enter your Gemini API key:');
+            if (currentApiKey) {
+              localStorage.setItem('GEMINI_API_KEY', currentApiKey);
+              setApiKey(currentApiKey);
+              currentApiKey = currentApiKey;
+            } else {
+              setIsThinking(false);
+              setResponse("I need an API key to answer your question.");
+              return;
+            }
+        }
     }
 
     try {
