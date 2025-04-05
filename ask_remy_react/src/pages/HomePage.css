@@ -8,9 +8,10 @@
 /* Create a flexible layout for sidebar + content */
 .main-content {
     display: flex;
+    flex-wrap: wrap; /* allows stacking when width is tight */
     width: 100%;
-    height: 100%; /* Ensures the content area takes full height */
-}
+    height: 100%;
+  }
 
 /* Sidebar stays fixed on the left */
 .side-bar {
@@ -85,3 +86,20 @@ body {
     border-radius: 12px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
+
+
+@media (max-width: 768px) {
+    .side-bar {
+      width: 100%;
+      min-width: 100%;
+      order: -1; /* moves it above the content */
+    }
+  
+    .content-area {
+      padding: 10px;
+    }
+  
+    .content-inner {
+      padding: 10px;
+    }
+  }
