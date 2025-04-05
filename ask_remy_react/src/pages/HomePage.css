@@ -39,6 +39,14 @@ h2 {
     margin-bottom: 20px;
 }
 
+.error-message {
+    color: #E74C3D;
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+
+
 .quote {
     font-style: italic;
     font-size: 18px;

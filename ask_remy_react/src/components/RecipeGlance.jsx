@@ -1,6 +1,16 @@
 import React from 'react';
 import './RecipeGlance.css';
 
+function shortenURL(fullUrl) {
+    try {
+        const urlObj = new URL(fullUrl);
+        return urlObj.hostname;
+    } catch (e) {
+        console.error("Invalid URL:", fullUrl);
+        return fullUrl;
+    }
+}
+
 const RecipeGlance = ({ recipe, onClose, onLaunch }) => {
   // Mock recipe data for preview if no recipe is provided
   const mockRecipe = {
@@ -45,7 +55,11 @@ const RecipeGlance = ({ recipe, onClose, onLaunch }) => {
         
         <div className="recipe-glance-header">
           <h2>{recipeData.title}</h2>
-          <p className="recipe-subtitle">Recipe at a Glance</p>
+          {/* <p className="recipe-subtitle">Recipe at a Glance from </p> */}
+          <p className="recipe-subtitle">
+                Recipe at a Glance from <a href={recipeData.url} target="_blank" rel="noopener noreferrer" className="recipe-source-url">{shortenURL(recipeData.url)}</a>
+          </p>
+
         </div>
         
         <div className="recipe-glance-content">
