@@ -2,11 +2,13 @@
 // Handles speech recognition and speech synthesis
 
 export default class VoiceService {
-    constructor(onWakeWordDetected, onTranscriptUpdate) {
+    constructor(onWakeWordDetected, onTranscriptUpdate, onStopCommandDetected) {
       this.recognition = null;
       this.isListening = false;
+      this.isSpeaking = false;
       this.onWakeWordDetected = onWakeWordDetected;
       this.onTranscriptUpdate = onTranscriptUpdate;
+      this.onStopCommandDetected = onStopCommandDetected;
       
       // Check if speech recognition is supported
       this.isSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
@@ -28,15 +30,28 @@ export default class VoiceService {
       this.recognition.lang = 'en-US';
   
       this.recognition.onresult = (event) => {
+        // Don't process speech if we're currently speaking
+        // This prevents the assistant from listening to itself
+        if (this.isSpeaking) {
+          return;
+        }
+        
         let interimTranscript = '';
         
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
+          const transcript = event.results[i][0].transcript.toLowerCase();
           
           if (event.results[i].isFinal) {
+            // Check for stop command
+            if (transcript.includes('stop')) {
+              this.stopSpeaking();
+              this.onStopCommandDetected();
+              return;
+            }
+            
             // Check for wake word
-            if (transcript.toLowerCase().includes('hey remy')) {
-              const questionMatch = transcript.toLowerCase().match(/hey remy,?\s*(.*)/i);
+            if (transcript.includes('hey remy')) {
+              const questionMatch = transcript.match(/hey remy,?\s*(.*)/i);
               const questionText = questionMatch ? questionMatch[1].trim() : '';
               
               // Call the wake word handler with the question (if any)
@@ -47,6 +62,7 @@ export default class VoiceService {
           }
         }
         
+        // Only update transcript if we're not speaking
         this.onTranscriptUpdate(interimTranscript);
       };
   
@@ -79,8 +95,28 @@ export default class VoiceService {
     // Speak a response
     speakResponse(text) {
       if ('speechSynthesis' in window) {
+        // Flag that we're speaking - this prevents the system from listening to itself
+        this.isSpeaking = true;
+        
         const utterance = new SpeechSynthesisUtterance(text);
+        
+        // When speaking stops, resume normal listening
+        utterance.onend = () => {
+          this.isSpeaking = false;
+        };
+        
         window.speechSynthesis.speak(utterance);
+        
+        // Store utterance reference so we can cancel it if needed
+        this.currentUtterance = utterance;
+      }
+    }
+    
+    // Stop speaking
+    stopSpeaking() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        this.isSpeaking = false;
       }
     }
   }

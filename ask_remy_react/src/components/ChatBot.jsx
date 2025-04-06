@@ -19,6 +19,20 @@ const ChatBot = ({ recipeContext, completedSteps }) => {
   
   // Reference to completedSteps to ensure we always have the latest value
   const completedStepsRef = useRef(completedSteps);
+
+
+  const handleClosePopup = () => {
+    // Stop speaking when popup is closed
+    if (voiceServiceRef.current) {
+      voiceServiceRef.current.stopSpeaking();
+    }
+
+    setQuestion('');
+    setResponse('');
+    setTranscript('');
+    setIsThinking(false);
+    setShowPopup(false);
+  };
   
   // Update the ref whenever completedSteps changes
   useEffect(() => {
@@ -82,13 +96,18 @@ const ChatBot = ({ recipeContext, completedSteps }) => {
       setQuestion(questionText);
       processQuestion(questionText);
     } else {
-      setResponse("I'm listening. How can I help with your recipe?");
+      setResponse("Ask me a question! Or say \"go away\"");
     }
   };
   
   // Update transcript from speech recognition
   const updateTranscript = (text) => {
     setTranscript(text);
+
+    console.log("Transcript:", text);
+    if (text.toLowerCase().includes('go away')) {
+      handleClosePopup();
+    }
   };
 
   // Process the question and get a response
@@ -119,6 +138,7 @@ const ChatBot = ({ recipeContext, completedSteps }) => {
       setResponse(result.message);
       
       // Read response aloud
+      // TODO: Maybe only read aloud if the popup is open? tried this, but then wouldn't speak the first time sometimes...
       if (result.success) {
         voiceServiceRef.current.speakResponse(result.message);
       }
@@ -201,7 +221,7 @@ const ChatBot = ({ recipeContext, completedSteps }) => {
   const handleButtonClick = () => {
     setShowPopup(true);
     setQuestion('');
-    setResponse("I'm listening. What would you like to know about your recipe?");
+    setResponse("Ask me a question! Or say \"go away\"");
   };
 
   return (
@@ -226,16 +246,17 @@ const ChatBot = ({ recipeContext, completedSteps }) => {
           <div className="recipe-glance-modal" ref={popupRef}>
             <button 
               className="close-button" 
-              onClick={() => setShowPopup(false)}
+              onClick={handleClosePopup}
             >
               ×
             </button>
             
             <div className="recipe-glance-header">
               <h2>Remy - Your Recipe Assistant</h2>
-              <p className="recipe-subtitle">
-                {question ? 'Your question:' : 'How can I help you?'}
-              </p>
+              {question 
+    ? 'Your question:' 
+    : <>Ask away! Commands begin with the phrase <b style={{ color: '#E74C3D' }}>"hey remy"</b></>
+  }
             </div>
             
             <div className="recipe-glance-content">
@@ -274,6 +295,7 @@ const ChatBot = ({ recipeContext, completedSteps }) => {
               )}
             </div>
             
+            {/* Buttons on the Bottom of the Screen */}
             <div className="recipe-glance-actions">
               <button 
                 className="secondary-button"
